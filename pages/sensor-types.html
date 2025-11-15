@@ -1,0 +1,123 @@
+<div class="row g-3 mb-4 align-items-center justify-content-between">
+    <div class="col-auto">
+        <h1 class="app-page-title mb-0">Tipos de Sensores</h1>
+    </div>
+
+    <div class="col-auto">
+        <div class="page-utilities">
+            <div class="row g-2 justify-content-start justify-content-md-end align-items-center">
+                <div class="col-auto">
+                    <form class="table-search-form row gx-1 align-items-center" id="search-form">
+                        <div class="col-auto">
+                            <input type="text" id="search-sensor-types" name="searchsensortypes" class="form-control search-orders" placeholder="Buscar tipo de sensor">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn app-btn-secondary">Buscar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-auto">
+                    <select class="form-select w-auto" id="filter-estado">
+                        <option selected value="all">Todos</option>
+                        <option value="active">Activos</option>
+                        <option value="inactive">Inactivos</option>
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#create-sensor-type-modal">Nuevo Tipo de Sensor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-card app-card-orders-table shadow-sm mb-5">
+    <div class="app-card-body">
+        <div class="table-responsive">
+            <table class="table app-table-hover mb-0 text-left">
+                <thead>
+                    <tr>
+                        <th class="cell">Nombre</th>
+                        <th class="cell">Modelo</th>
+                        <th class="cell">Descripción</th>
+                        <th class="cell">Estado</th>
+                        <th class="cell">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="sensor-types-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<nav class="app-pagination" id="pagination-container">
+    <ul class="pagination justify-content-center" id="pagination-list">
+    </ul>
+</nav>
+
+<!-- Modal para crear tipo de sensor -->
+<div class="modal fade" id="create-sensor-type-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Nuevo Tipo de Sensor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-sensor-type-form">
+                    <div class="mb-3">
+                        <label for="create-nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="create-nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create-modelo" class="form-label">Modelo</label>
+                        <input type="text" class="form-control" id="create-modelo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create-descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="create-descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Tipo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar tipo de sensor -->
+<div class="modal fade" id="edit-sensor-type-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Tipo de Sensor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-sensor-type-form">
+                    <input type="hidden" id="edit-sensor-type-id">
+                    <div class="mb-3">
+                        <label for="edit-nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="edit-nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-modelo" class="form-label">Modelo</label>
+                        <input type="text" class="form-control" id="edit-modelo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="edit-descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
