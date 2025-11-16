@@ -30,7 +30,7 @@ const loadContent = async (page) => {
       import('./pages/sensors.js')
         .then(sensorsModule => sensorsModule.init());
     }
-    if (page === 'sensor-types' || page === 'tipoSensores') {
+    if (page === 'sensor-types') {
       import('./pages/sensor_types.js')
         .then(sensorTypesModule => sensorTypesModule.init());
     }
