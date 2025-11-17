@@ -1,56 +1,47 @@
 <!--  Row 1 -->
 <div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
-        
-        <div class="d-md-flex align-items-center">
-          <div>
-            <h4 class="card-title">Usuarios</h4>
-            <p class="card-subtitle">
-              Módulo de usuarios (solo administradores)
-            </p>
-          </div>
-          <div class="ms-auto mt-3 mt-md-0">
-                    <select class="form-select w-auto" id="filter-estado">
-                        <option selected value="all">Todos</option>
-                        <option value="active">Activos</option>
-                        <option value="inactive">Inactivos</option>
-                    </select>
-                </div>
-          <div class="ms-auto mt-3 mt-md-0">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              Agregar nuevo usuario
-            </button>
-          </div>
-
+    <div class="col-12">
+        <div class="card">
+        <div class="card-body">
+            <div class="d-md-flex align-items-center">
+            <div>
+                <h4 class="card-title">Usuarios</h4>
+                <p class="card-subtitle">
+                  Módulo de usuarios (solo administradores) ...
+                </p>
+            </div>
+            <div class="ms-auto mt-3 mt-md-0">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  Agregar nuevo usuario
+                </button>
+            </div>
+            </div>
+            <div class="table-responsive mt-4">
+            <table class="table mb-0 text-nowrap varient-table align-middle">
+                <thead>
+                <tr>
+                    <th scope="col" class="px-0 text-muted">
+                    Nombre / identificación
+                    </th>
+                    <th scope="col" class="px-0 text-muted">Correo</th>
+                    <th scope="col" class="px-0 text-muted">Teléfono</th>
+                    <th scope="col" class="px-0 text-muted">
+                    Estado
+                    </th>
+                    <th scope="col" class="px-0 text-muted text-end">
+                    Rol
+                    </th>
+                    <th scope="col" class="px-0 text-muted text-end">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="users-table-body">
+                </tbody>
+            </table>
+            </div>
         </div>
-        <div class="table-responsive mt-4">
-          <table class="table mb-0 text-nowrap varient-table align-middle fs-10">
-            <thead>
-              <tr>
-                <th scope="col" class="px-0 text-muted">
-                  Nombre / identificación
-                </th>
-                <th scope="col" class="px-0 text-muted">Correo</th>
-                <th scope="col" class="px-0 text-muted">Teléfono</th>
-                <th scope="col" class="px-0 text-muted">
-                  Estado
-                </th>
-                <th scope="col" class="px-0 text-muted text-end">
-                  Rol
-                </th>
-                <th scope="col" class="px-0 text-muted text-end">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="users-table-body">
-            </tbody>
-          </table>
         </div>
-      </div>
     </div>
-  </div>
 </div> <!-- end row -->
 
 

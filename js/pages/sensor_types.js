@@ -1,5 +1,4 @@
 import { tipoSensorService } from "../api/sensorType.service.js";
-import { authService } from "../api/auth.service.js"; // Ajusta la ruta según tu proyecto
 
 let modalInstance = null;
 let createModalInstance = null;
@@ -7,29 +6,19 @@ let allSensorTypes = [];
 
 function createSensorTypeRow(sensorType) {
   const tipoId = sensorType.id_tipo;
-  
-  // Mostrar botón editar solo si puede actualizar
-  const canUpdate = authService.canUpdate();
-  const editButton = canUpdate 
-    ? `<button class="btn btn-sm btn-info btn-edit-sensor-type" data-tipo-id="${tipoId}">
-         <i class="fa-regular fa-pen-to-square"></i>
-       </button>`
-    : '';
-  
-  // Mostrar switch solo si puede cambiar estado
-  const canChangeStatus = authService.canChangeStatus();
-  const statusCell = canChangeStatus
-    ? `<div class="form-check form-switch d-inline-block">
-         <input class="form-check-input sensor-type-status-switch" type="checkbox" 
-           id="switch-${tipoId}" data-tipo-id="${tipoId}"
-           ${sensorType.estado ? "checked" : ""}>
-         <label class="form-check-label" for="switch-${tipoId}">
-           ${sensorType.estado ? "Activo" : "Inactivo"}
-         </label>
-       </div>`
-    : `<span class="badge ${sensorType.estado ? 'bg-success' : 'bg-secondary'}">
-         ${sensorType.estado ? "Activo" : "Inactivo"}
-       </span>`;
+
+  const editButton = `<button class="btn btn-sm btn-success btn-edit-sensor-type" data-tipo-id="${tipoId}">
+        <i class="fa-regular fa-pen-to-square"></i>
+      </button>`;
+
+  const statusCell = `<div class="form-check form-switch d-inline-block">
+        <input class="form-check-input sensor-type-status-switch" type="checkbox" 
+          id="switch-${tipoId}" data-tipo-id="${tipoId}"
+          ${sensorType.estado ? "checked" : ""}>
+        <label class="form-check-label" for="switch-${tipoId}">
+          ${sensorType.estado ? "Activo" : "Inactivo"}
+        </label>
+      </div>`;
 
   return `
     <tr>
@@ -48,9 +37,9 @@ function filterSensorTypes(filterValue) {
   if (filterValue === "all") {
     filteredTypes = allSensorTypes;
   } else if (filterValue === "active") {
-    filteredTypes = allSensorTypes.filter(t => t.estado === 1);
+    filteredTypes = allSensorTypes.filter(t => t.estado === 1 || t.estado === true);
   } else if (filterValue === "inactive") {
-    filteredTypes = allSensorTypes.filter(t => t.estado === 0);
+    filteredTypes = allSensorTypes.filter(t => t.estado === 0 || t.estado === false);
   }
 
   const tableBody = document.getElementById("sensor-types-table-body");
@@ -68,16 +57,6 @@ function filterSensorTypes(filterValue) {
 }
 
 async function openEditModal(tipoId) {
-  // Verificar permiso
-  if (!authService.canUpdate()) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Sin Permiso',
-      text: 'No tienes permisos para editar.',
-    });
-    return;
-  }
-
   const modalElement = document.getElementById("edit-sensor-type-modal");
   if (!modalInstance) {
     modalInstance = new bootstrap.Modal(modalElement);
@@ -90,7 +69,6 @@ async function openEditModal(tipoId) {
     document.getElementById("edit-descripcion").value = tipo.descripcion;
     modalInstance.show();
   } catch (error) {
-    console.error("Error al obtener tipo de sensor:", error);
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -116,26 +94,18 @@ async function handleUpdateSubmit(event) {
     return;
   }
 
-  const updatedData = {
-    nombre,
-    modelo,
-    descripcion,
-  };
+  const updatedData = { nombre, modelo, descripcion };
 
   try {
     await tipoSensorService.updateTipoSensor(tipoId, updatedData);
     modalInstance.hide();
-
     Swal.fire({
       icon: "success",
       title: "Éxito",
       text: "Tipo de sensor actualizado exitosamente.",
     });
-
     init();
   } catch (error) {
-    console.error("Error al actualizar tipo de sensor:", error);
-
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -160,12 +130,7 @@ async function handleCreateSubmit(event) {
     return;
   }
 
-  const newTypeData = {
-    nombre,
-    modelo,
-    descripcion,
-    estado: true,
-  };
+  const newTypeData = { nombre, modelo, descripcion, estado: true };
 
   try {
     await tipoSensorService.createTipoSensor(newTypeData);
@@ -181,8 +146,6 @@ async function handleCreateSubmit(event) {
 
     init();
   } catch (error) {
-    console.error("Error al crear tipo de sensor:", error);
-
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -209,16 +172,13 @@ async function handleStatusSwitch(event) {
     if (result.isConfirmed) {
       try {
         await tipoSensorService.changeTipoSensorStatus(tipoId, newStatus);
-
         Swal.fire({
           icon: "success",
           title: "Éxito",
           text: `El tipo de sensor ha sido ${newStatus ? "activado" : "desactivado"}.`,
         });
-
         init();
       } catch (error) {
-        console.error("Error al cambiar estado:", error);
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -237,7 +197,6 @@ async function handleTableClick(event) {
   if (editButton) {
     const tipoId = editButton.dataset.tipoId;
     openEditModal(tipoId);
-    return;
   }
 }
 
@@ -246,24 +205,12 @@ function handleFilterChange(event) {
 }
 
 async function init() {
-  // OCULTAR BOTÓN DE CREAR si no tiene permiso
-  authService.hideIfNoPermission('[data-bs-target="#create-sensor-type-modal"]', authService.canCreate());
-
-  const canUpdate = authService.canUpdate();
-  if (!canUpdate) {
-    // Ocultar el th de Acciones
-    const thAcciones = document.querySelector('.accion');
-    if (thAcciones) {
-      thAcciones.style.display = 'none';
-    }
-  }
   const tableBody = document.getElementById("sensor-types-table-body");
   if (!tableBody) return;
 
   tableBody.innerHTML =
-    '<tr><td colspan="5" class="text-center">Cargando tipos de sensores...</td></tr>';
+    '<tr><td colspan="5" class="text-center">Cargando tipos de sensores</td></tr>';
 
-  // Inicializar modal de creación
   const createModalElement = document.getElementById("create-sensor-type-modal");
   if (createModalElement && !createModalInstance) {
     createModalInstance = new bootstrap.Modal(createModalElement);
@@ -280,7 +227,6 @@ async function init() {
         '<tr><td colspan="5" class="text-center">No hay tipos de sensores registrados.</td></tr>';
     }
   } catch (error) {
-    console.error("Error al cargar tipos de sensores:", error);
     tableBody.innerHTML =
       '<tr><td colspan="5" class="text-center text-danger">Error al cargar datos.</td></tr>';
   }

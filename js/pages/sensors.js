@@ -5,6 +5,8 @@ import { galponService } from "../api/galpon.service.js";
 let modalInstance = null;
 let createModalInstance = null;
 let allSensors = [];
+let allTipos = [];
+let allGalpones = [];
 
 function createSensorRow(sensor) {
   const sensorId = sensor.id_sensor;
@@ -17,11 +19,11 @@ function createSensorRow(sensor) {
       <td class="cell">${sensor.descripcion}</td>
       <td class="cell">
         <div class="form-check form-switch d-inline-block">
-          <input class="form-check-input sensor-status-switch" type="checkbox" 
-            id="switch-${sensorId}" data-sensor-id="${sensorId}"
-            ${sensor.estado ? "checked" : ""}>
+          <input class="form-check-input sensor-status-switch" type="checkbox" role="switch" 
+                 id="switch-${sensorId}" data-sensor-id="${sensorId}" 
+                 ${sensor.estado ? 'checked' : ''}>
           <label class="form-check-label" for="switch-${sensorId}">
-            ${sensor.estado ? "Activo" : "Inactivo"}
+            ${sensor.estado ? 'Activo' : 'Inactivo'}
           </label>
         </div>
       </td>
@@ -34,35 +36,70 @@ function createSensorRow(sensor) {
   `;
 }
 
-function filterSensors(filterValue) {
-  let filteredSensors = [];
+function filterSensors() {
+  const estadoFilter = document.getElementById("filter-estado").value;
+  const tipoFilter = document.getElementById("filter-tipo").value;
+  const galponFilter = document.getElementById("filter-galpon").value;
 
-  if (filterValue === "all") {
-    filteredSensors = allSensors;
-  } else if (filterValue === "active") {
-    filteredSensors = allSensors.filter(s => s.estado === 1);
-  } else if (filterValue === "inactive") {
-    filteredSensors = allSensors.filter(s => s.estado === 0);
+  let filteredSensors = allSensors;
+
+  if (estadoFilter === "active") {
+    filteredSensors = filteredSensors.filter(s => s.estado === 1 || s.estado === true);
+  } else if (estadoFilter === "inactive") {
+    filteredSensors = filteredSensors.filter(s => s.estado === 0 || s.estado === false);
+  }
+
+  if (tipoFilter !== "all") {
+    filteredSensors = filteredSensors.filter(s => s.id_tipo_sensor == tipoFilter);
+  }
+
+  if (galponFilter !== "all") {
+    filteredSensors = filteredSensors.filter(s => s.id_galpon == galponFilter);
   }
 
   const tableBody = document.getElementById("sensors-table-body");
   if (!tableBody) return;
+
+
 
   if (filteredSensors.length > 0) {
     tableBody.innerHTML = filteredSensors.map(createSensorRow).join("");
   } else {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center">No hay sensores con ese filtro.</td>
+        <td colspan="6" class="text-center">No hay sensores con esos filtros.</td>
       </tr>
     `;
   }
 }
 
+async function cargarFiltros() {
+  try {
+    allTipos = await tipoSensorService.getTipoSensores();
+    const filterTipo = document.getElementById("filter-tipo");
+    if (filterTipo) {
+      filterTipo.innerHTML = '<option value="all">Todos los tipos</option>';
+      allTipos.forEach((t) => {
+        filterTipo.innerHTML += `<option value="${t.id_tipo}">${t.nombre} - ${t.modelo}</option>`;
+      });
+    }
+
+    allGalpones = await galponService.getGalponesActivos();
+    const filterGalpon = document.getElementById("filter-galpon");
+    if (filterGalpon) {
+      filterGalpon.innerHTML = '<option value="all">Todos los galpones</option>';
+      allGalpones.forEach((g) => {
+        filterGalpon.innerHTML += `<option value="${g.id_galpon}">${g.nombre}</option>`;
+      });
+    }
+  } catch (error) {
+    console.error("Error al cargar filtros:", error);
+  }
+}
 
 async function cargarTiposSensores() {
   try {
-    const tipos = await tipoSensorService.getTipoSensores();
+    const tipos = await tipoSensorService.getTipoSensoresActivos();
 
     const selectCrear = document.getElementById("create-id_tipo_sensor");
     if (selectCrear) {
@@ -78,7 +115,7 @@ async function cargarTiposSensores() {
     const selectEditar = document.getElementById("edit-id_tipo_sensor");
     if (selectEditar) {
       selectEditar.innerHTML =
-        '<option value="" disabled selected>Seleccione un tipo...</option>';
+        '<option value="" disabled selected>Seleccione un tipo</option>';
 
       tipos.forEach((t) => {
         if (t.id_tipo !== null && t.id_tipo !== undefined)
@@ -92,18 +129,18 @@ async function cargarTiposSensores() {
 
 async function cargarGalpones() {
   try {
-    const galpones = await galponService.getGalpones();
+    const galpones = await galponService.getGalponesActivos();
 
     const selectCrear = document.getElementById("create-id_galpon");
     selectCrear.innerHTML =
-      '<option value="" disabled selected>Seleccione un galpón...</option>';
+      '<option value="" disabled selected>Seleccione un galpón</option>';
     galpones.forEach((g) => {
       selectCrear.innerHTML += `<option value="${g.id_galpon}">${g.nombre}</option>`;
     });
 
     const selectEditar = document.getElementById("edit-id_galpon");
     selectEditar.innerHTML =
-      '<option value="" disabled selected>Seleccione un galpón...</option>';
+      '<option value="" disabled selected>Seleccione un galpón</option>';
     galpones.forEach((g) => {
       selectEditar.innerHTML += `<option value="${g.id_galpon}">${g.nombre}</option>`;
     });
@@ -115,7 +152,7 @@ async function cargarGalpones() {
 async function openEditModal(sensorId) {
   const modalElement = document.getElementById("edit-sensor-modal");
   if (!modalInstance){
-  modalInstance = new bootstrap.Modal(modalElement);
+    modalInstance = new bootstrap.Modal(modalElement);
   }
   try {
     const sensor = await sensorService.getSensorById(sensorId);
@@ -278,17 +315,19 @@ async function handleTableClick(event) {
   }
 }
 
-function handleFilterChange(event) {
-  filterSensors(event.target.value);
+function handleFilterChange() {
+  filterSensors();
 }
 
 async function init() {
   const tableBody = document.getElementById("sensors-table-body");
   if (!tableBody) return;
 
+  const colspan = 6;
   tableBody.innerHTML =
-    '<tr><td colspan="6" class="text-center">Cargando sensores...</td></tr>';
+    `<tr><td colspan="${colspan}" class="text-center">Cargando sensores</td></tr>`;
 
+  await cargarFiltros();
   await cargarTiposSensores();
   await cargarGalpones();
 
@@ -300,17 +339,19 @@ async function init() {
       tableBody.innerHTML = allSensors.map(createSensorRow).join("");
     } else {
       tableBody.innerHTML =
-        '<tr><td colspan="6" class="text-center">No hay sensores registrados.</td></tr>';
+        `<tr><td colspan="${colspan}" class="text-center">No hay sensores registrados.</td></tr>`;
     }
   } catch (error) {
     console.error("Error al cargar sensores:", error);
     tableBody.innerHTML =
-      '<tr><td colspan="6" class="text-center text-danger">Error al cargar datos.</td></tr>';
+      `<tr><td colspan="${colspan}" class="text-center text-danger">Error al cargar datos.</td></tr>`;
   }
 
   const editForm = document.getElementById("edit-sensor-form");
   const createForm = document.getElementById("create-sensor-form");
-  const filterSelect = document.getElementById("filter-estado");
+  const filterEstado = document.getElementById("filter-estado");
+  const filterTipo = document.getElementById("filter-tipo");
+  const filterGalpon = document.getElementById("filter-galpon");
 
   tableBody.removeEventListener("click", handleTableClick);
   tableBody.addEventListener("click", handleTableClick);
@@ -324,9 +365,19 @@ async function init() {
   createForm.removeEventListener("submit", handleCreateSubmit);
   createForm.addEventListener("submit", handleCreateSubmit);
 
-  if (filterSelect) {
-    filterSelect.removeEventListener("change", handleFilterChange);
-    filterSelect.addEventListener("change", handleFilterChange);
+  if (filterEstado) {
+    filterEstado.removeEventListener("change", handleFilterChange);
+    filterEstado.addEventListener("change", handleFilterChange);
+  }
+
+  if (filterTipo) {
+    filterTipo.removeEventListener("change", handleFilterChange);
+    filterTipo.addEventListener("change", handleFilterChange);
+  }
+
+  if (filterGalpon) {
+    filterGalpon.removeEventListener("change", handleFilterChange);
+    filterGalpon.addEventListener("change", handleFilterChange);
   }
 }
 

@@ -51,6 +51,9 @@ export const sensorService = {
         return request(endpoint);
     },
 
+    getSensorsByTipo: (idTipo) => {
+        return request(`/sensors/sensor/by-tipo/${idTipo}`);
+    },
     
     /**
      * @param {object} sensorData
